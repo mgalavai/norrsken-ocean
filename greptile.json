@@ -1,0 +1,13 @@
+{
+    "comments": {
+        "style": true,
+        "logic": true,
+        "performance": true,
+        "security": true
+    },
+    "custom_instructions": "1. VISUAL STYLE: Use the project's 'Solid 2D High Contrast' design system. Avoid glassmorphism or heavy blurs. The UI should look like a clean, scientific instrument. \n 2. TECH STACK: Use React + Vite + TypeScript. Use Tailwind CSS v4 (no configuration file, just CSS imports). \n 3. STATE: Use Zustand for state management. Ensure store updates are immutable. \n 4. 3D: Use React Three Fiber for the 3D scenes (World, Lab, Simulation). Keep the HUD layer separate from the 3D canvas.",
+    "ignore": [
+        "public/earth_texture.jpg",
+        "package-lock.json"
+    ]
+}
