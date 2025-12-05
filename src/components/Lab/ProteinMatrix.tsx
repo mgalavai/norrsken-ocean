@@ -30,8 +30,12 @@ export const ProteinMatrix = () => {
         let x = ((clientX - rect.left) / rect.width) * 2 - 1;
         let y = -(((clientY - rect.top) / rect.height) * 2 - 1); // Invert Y so up is positive
 
-        // Clamp inside circle or square? Square is fine for now as per image.
-        // Actually, let's clamp to -1, 1
+        // Snap to grid (step size 0.25 -> 4 steps per quadrant)
+        const step = 0.25;
+        x = Math.round(x / step) * step;
+        y = Math.round(y / step) * step;
+
+        // Clamp inside -1 to 1
         x = Math.max(-1, Math.min(1, x));
         y = Math.max(-1, Math.min(1, y));
 
@@ -87,25 +91,7 @@ export const ProteinMatrix = () => {
                 </div>
             </div>
 
-            {/* Stats numeric readout */}
-            <div className="absolute -right-40 top-0 w-32 space-y-2 pointer-events-none">
-                <div className="text-right">
-                    <div className="text-[10px] text-gray-500">HEAT</div>
-                    <div className="text-red-400 font-mono">{(Math.max(0, foldingState.y * 100)).toFixed(0)}%</div>
-                </div>
-                <div className="text-right">
-                    <div className="text-[10px] text-gray-500">INTEGRITY</div>
-                    <div className="text-blue-400 font-mono">{(Math.max(0, -foldingState.y * 100)).toFixed(0)}%</div>
-                </div>
-                <div className="text-right">
-                    <div className="text-[10px] text-gray-500">FILTRATION</div>
-                    <div className="text-purple-400 font-mono">{(Math.max(0, foldingState.x * 100)).toFixed(0)}%</div>
-                </div>
-                <div className="text-right">
-                    <div className="text-[10px] text-gray-500">GROWTH</div>
-                    <div className="text-green-400 font-mono">{(Math.max(0, -foldingState.x * 100)).toFixed(0)}%</div>
-                </div>
-            </div>
+
         </div>
     );
 };
