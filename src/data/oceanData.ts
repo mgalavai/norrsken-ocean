@@ -37,7 +37,7 @@ export const MISSIONS: Mission[] = [
         title: 'Baltic Sea Dead Zone',
         location: [59.0, 20.0],
         description: 'Anoxic waters due to eutrophication. Needs resilient organisms.',
-        difficulty: { temp: 15, virulence: 30, pollution: 20, currents: 5 },
+        difficulty: { temp: 15, virulence: 30, pollution: 20, currents: 5 }, // Virulence here maps to Acidity/pH in UI
         status: 'LOCKED',
         rewards: 200
     }

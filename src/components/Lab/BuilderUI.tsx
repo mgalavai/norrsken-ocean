@@ -1,69 +1,102 @@
-import { useMemo } from 'react';
 import { useGameStore } from '../../store/useGameStore';
-import { SequenceEditor } from './SequenceEditor';
+import { ProteinMatrix } from './ProteinMatrix';
 
 export const BuilderUI = () => {
-    const sciencePoints = useGameStore(state => state.sciencePoints);
-    const clearOrganism = useGameStore(state => state.clearOrganism);
-    const setView = useGameStore(state => state.setView);
-    const sequence = useGameStore(state => state.currentOrganism.sequence);
-
-    const totalStats = useMemo(() => sequence.reduce((acc, m) => {
-        if (!m) return acc;
-        return {
-            heatRes: acc.heatRes + m.stats.heatRes,
-            structuralIntegrity: acc.structuralIntegrity + m.stats.structuralIntegrity,
-            growthRate: acc.growthRate + m.stats.growthRate,
-            filtration: acc.filtration + m.stats.filtration
-        };
-    }, { heatRes: 0, structuralIntegrity: 0, growthRate: 0, filtration: 0 }), [sequence]);
+    const { setView, selectedMission, currentOrganism } = useGameStore();
 
     return (
-        <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6">
-            {/* Header Stats */}
-            <div className="flex justify-between items-start pointer-events-auto">
-                <div className="bg-gray-900/95 p-4 rounded-xl border border-gray-700 text-white shadow-xl min-w-[200px]">
-                    <h2 className="text-xl font-bold text-white mb-2">
-                        LABORATORY
-                    </h2>
-                    <div className="mt-2 space-y-1 text-sm font-mono text-gray-300">
-                        <p>Science Points: <span className="text-yellow-400">{sciencePoints}</span></p>
-                        <div className="h-px bg-white/10 my-2"></div>
-                        <p>Heat Res: <span className="text-red-400">{totalStats.heatRes}</span></p>
-                        <p>Integrity: <span className="text-blue-400">{totalStats.structuralIntegrity}</span></p>
-                        <p>Growth: <span className="text-green-400">{totalStats.growthRate}</span></p>
-                        <p>Filtration: <span className="text-yellow-400">{totalStats.filtration}</span></p>
+        <div className="absolute inset-0">
+
+            {/* 1. Background Image Layer - BOTTOM LAYER */}
+            <img
+                src="/lab_background.jpeg"
+                alt="Lab Background"
+                className="absolute inset-0 w-full h-full object-contain object-left"
+            />
+
+
+            {/* 2. The Matrix Controller - positioned over the tablet screen */}
+            <div
+                className="absolute pointer-events-auto"
+                style={{ top: '388px', left: '362px', transform: 'translate(-50%, -50%)' }}
+            >
+                <ProteinMatrix />
+            </div>
+
+
+            {/* 3. The Right UI Panel (Analysis & Actions) */}
+            <div className="absolute top-0 right-0 h-full w-[450px] bg-black/20 backdrop-blur-md border-l border-white/5 p-8 flex flex-col pointer-events-auto">
+
+                {/* Header */}
+                <div className="mb-10">
+                    <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-2">
+                        THE LAB
+                    </h1>
+                    <div className="text-sm text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <span>Project:</span>
+                        <span className="text-white font-semibold">{selectedMission?.title || 'Unknown Protocol'}</span>
                     </div>
                 </div>
 
-                <div className="flex gap-2">
-                    <button
-                        onClick={clearOrganism}
-                        className="bg-red-500/20 hover:bg-red-500/40 text-red-200 px-4 py-2 rounded-lg border border-red-500/30 text-xs transition-colors"
-                    >
-                        Reset DNA
-                    </button>
+                {/* Organism Status (Derived from Pulse Matrix) */}
+                <div className="flex-1 space-y-8">
+
+                    {/* Visualizer Placeholder (The 3D helix is behind everything in canvas, this is just stats text) */}
+                    <div className="bg-gray-900/50 rounded-lg p-6 border border-white/10 relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500"></div>
+                        <h3 className="text-lg font-bold text-white mb-4 flex justify-between">
+                            <span>Analysis</span>
+                            <span className="text-cyan-400 text-sm font-mono animate-pulse">LIVE</span>
+                        </h3>
+
+                        <div className="space-y-4 font-mono text-sm">
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-400">Survival Probability</span>
+                                <span className="text-green-400 font-bold">
+                                    {(currentOrganism.attributes.heatRes + currentOrganism.attributes.integrity + currentOrganism.attributes.filtration) / 3 > 30 ? 'HIGH' : 'CRITICAL'}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-400">Resources Used</span>
+                                <span className="text-white">125 / 500 nW</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded text-xs text-blue-200 leading-relaxed">
+                        <strong className="block mb-1 text-blue-400">ADVISORY:</strong>
+                        Use the <span className="text-white font-bold">Genetic Matrix</span> on the datapad to shape the protein's evolutionary path.
+                        <br />
+                        <ul className="list-disc pl-4 mt-2 space-y-1 text-gray-400">
+                            <li>Up/Down controls stability (Heat vs Cold).</li>
+                            <li>Left/Right controls metabolic output (Growth vs Filtration).</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                {/* Footer Actions */}
+                <div className="mt-auto pt-8 border-t border-white/10 space-y-4">
                     <button
                         onClick={() => setView('WORLD')}
-                        className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors border border-white/10"
+                        className="w-full py-3 rounded border border-gray-600 text-gray-400 hover:text-white hover:bg-white/5 transition-colors uppercase tracking-widest text-xs"
                     >
-                        Back to Map
+                        Abort Sequence
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            // Run simulation
+                            setView('SIMULATION');
+                            // setTimeout(() => completeMission(true), 3000); // Hacky sim for now
+                        }}
+                        className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(8,145,178,0.4)] transition-all hover:scale-[1.02]"
+                    >
+                        Initiate Deployment
                     </button>
                 </div>
             </div>
 
-            {/* Bottom Editor Area */}
-            <div className="flex flex-col items-center gap-4 pb-4">
-
-                <SequenceEditor />
-
-                <button
-                    onClick={() => setView('SIMULATION')}
-                    className="pointer-events-auto bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg font-bold shadow-lg shadow-green-500/20 transition-all hover:scale-105 border border-green-400/50"
-                >
-                    DEPLOY ORGANISM
-                </button>
-            </div>
         </div>
     );
 };

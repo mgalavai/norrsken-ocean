@@ -13,8 +13,17 @@ interface GameState {
 
     // Lab State
     currentOrganism: {
-        sequence: (BioModule | null)[]; // Fixed 15 slots
+        sequence: (BioModule | null)[]; // Visual representation
+        attributes: { // Derived from Folding Matrix
+            heatRes: number;
+            integrity: number;
+            growth: number;
+            filtration: number;
+        };
     };
+
+    // The Matrix Controller State (-1 to 1)
+    foldingState: { x: number; y: number; };
 
     // Global Environmental State (0 to 100, where 100 is catastrophe)
     globalStats: {
@@ -27,6 +36,7 @@ interface GameState {
     // Actions
     setView: (view: GameView) => void;
     selectMission: (missionId: string) => void;
+    setFoldingState: (x: number, y: number) => void;
     toggleModuleInSlot: (index: number, module: BioModule) => void;
     clearOrganism: () => void;
     completeMission: (success: boolean) => void;
@@ -47,8 +57,11 @@ export const useGameStore = create<GameState>((set) => ({
     },
 
     currentOrganism: {
-        sequence: Array(15).fill(null)
+        sequence: Array(15).fill(null), // We might procedureally fill this now
+        attributes: { heatRes: 0, integrity: 0, growth: 0, filtration: 0 }
     },
+
+    foldingState: { x: 0, y: 0 },
 
     setView: (view) => set({ view }),
 
@@ -57,40 +70,42 @@ export const useGameStore = create<GameState>((set) => ({
         view: 'LAB' // Auto switch to Lab when mission selected
     })),
 
-    toggleModuleInSlot: (index, module) => set((state) => {
-        const currentSequence = [...state.currentOrganism.sequence];
-        const existingModule = currentSequence[index];
+    setFoldingState: (x, y) => set((state) => {
+        // Calculate derived stats
+        // Top (Y=1): Heat, Bottom (Y=-1): Integrity
+        // Right (X=1): Filtration, Left (X=-1): Growth
 
-        // If clicking same module in same slot, remove it (refund)
-        if (existingModule && existingModule.id === module.id) {
-            const refund = existingModule.cost;
-            currentSequence[index] = null;
-            return {
-                sciencePoints: state.sciencePoints + refund,
-                currentOrganism: { sequence: currentSequence }
-            };
-        }
+        const heatRes = Math.max(0, y * 100);
+        const integrity = Math.max(0, -y * 100);
+        const filtration = Math.max(0, x * 100);
+        const growth = Math.max(0, -x * 100);
 
-        // If replacing or adding new
-        const costDiff = module.cost - (existingModule ? existingModule.cost : 0);
+        // Procedurally generate "Sequence" for visual flair
+        // If Y > 0.5 -> Red modules
+        // If X > 0.5 -> Purple modules
+        // etc.
+        const newSequence = Array(15).fill(null).map((_, i) => {
+            if (i % 2 === 0) return null; // Spacing
+            if (y > 0.2 && i < 7) return { id: 's_heat', type: 'TETRAHEDRON' as const, color: '#ef4444', name: 'Heat', cost: 10, stats: { heatRes: 10, structuralIntegrity: 0, growthRate: 0, filtration: 0 }, description: 'Heat' };
+            if (y < -0.2 && i < 7) return { id: 's_cold', type: 'CUBE' as const, color: '#3b82f6', name: 'Cold', cost: 10, stats: { heatRes: 0, structuralIntegrity: 10, growthRate: 0, filtration: 0 }, description: 'Cold' };
+            if (x > 0.2 && i >= 7) return { id: 's_filt', type: 'CYLINDER' as const, color: '#a855f7', name: 'Filt', cost: 10, stats: { heatRes: 0, structuralIntegrity: 0, growthRate: 0, filtration: 10 }, description: 'Filt' };
+            if (x < -0.2 && i >= 7) return { id: 's_grow', type: 'SPHERE' as const, color: '#22c55e', name: 'Grow', cost: 10, stats: { heatRes: 0, structuralIntegrity: 0, growthRate: 10, filtration: 0 }, description: 'Grow' };
+            return null;
+        });
 
-        if (state.sciencePoints < costDiff) return state; // Can't afford
-
-        currentSequence[index] = module;
         return {
-            sciencePoints: state.sciencePoints - costDiff,
-            currentOrganism: { sequence: currentSequence }
+            foldingState: { x, y },
+            currentOrganism: {
+                sequence: newSequence, // For the 3D view
+                attributes: { heatRes, integrity, filtration, growth }
+            }
         };
     }),
 
-    clearOrganism: () => set((state) => {
-        // Refund points
-        const refund = state.currentOrganism.sequence.reduce((acc, m) => acc + (m ? m.cost : 0), 0);
-        return {
-            sciencePoints: state.sciencePoints + refund,
-            currentOrganism: { sequence: Array(15).fill(null) }
-        };
-    }),
+    // Removed manual toggleModuleInSlot as we use matrix now.
+    // Keeping clearOrganism logic simple
+    toggleModuleInSlot: () => { },
+    clearOrganism: () => set({ foldingState: { x: 0, y: 0 }, currentOrganism: { sequence: [], attributes: { heatRes: 0, integrity: 0, growth: 0, filtration: 0 } } }),
 
     completeMission: (success) => set((state) => {
         if (!state.selectedMission) return state;

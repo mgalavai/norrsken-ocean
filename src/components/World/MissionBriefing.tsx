@@ -7,55 +7,75 @@ export const MissionBriefing = () => {
     if (!selectedMission) return null;
 
     return (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-gray-900 border border-gray-600 rounded-lg max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="relative w-full max-w-lg bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden">
 
-                {/* Background Grid */}
-                <div className="absolute inset-0 opacity-5 pointer-events-none"
-                    style={{ backgroundImage: 'linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+                {/* Grid Background */}
+                <div className="absolute inset-0 bg-gray-950/50 z-0" />
+                <div className="absolute inset-0 opacity-10 pointer-events-none z-0 mix-blend-overlay"
+                    style={{
+                        backgroundImage: `
+                            linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
+                        `,
+                        backgroundSize: '30px 30px'
+                    }}>
                 </div>
 
-                <h2 className="text-2xl font-bold text-white mb-2 relative z-10">{selectedMission.title}</h2>
-                <div className="h-0.5 w-full bg-gradient-to-r from-blue-500 to-transparent mb-4"></div>
+                {/* Content Container */}
+                <div className="relative z-10 p-8 space-y-6">
 
-                <p className="text-gray-300 mb-6 text-sm leading-relaxed relative z-10">
-                    {selectedMission.description}
-                </p>
+                    {/* Header */}
+                    <div className="space-y-2">
+                        <h2 className="text-3xl font-bold text-white tracking-tight">{selectedMission.title}</h2>
+                        <div className="h-1 w-24 bg-blue-600 rounded-full"></div>
+                    </div>
 
-                <div className="space-y-3 mb-6 relative z-10">
-                    <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider">Environmental Threats</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className="bg-black/50 p-2 rounded border border-white/5 flex gap-2 items-center">
-                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                            <span className="text-xs text-gray-300">Temp: {selectedMission.difficulty.temp}°C</span>
-                        </div>
-                        <div className="bg-black/50 p-2 rounded border border-white/5 flex gap-2 items-center">
-                            <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                            <span className="text-xs text-gray-300">Pollution: {selectedMission.difficulty.pollution}%</span>
-                        </div>
-                        <div className="bg-black/50 p-2 rounded border border-white/5 flex gap-2 items-center">
-                            <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                            <span className="text-xs text-gray-300">Acidity: {selectedMission.difficulty.virulence}</span>
+                    {/* Description */}
+                    <p className="text-gray-300 text-sm leading-relaxed border-l-2 border-gray-700 pl-4 py-1">
+                        {selectedMission.description}
+                    </p>
+
+                    {/* Threats Stats */}
+                    <div className="space-y-3">
+                        <h3 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-3">Environmental Threats</h3>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-black/40 p-3 rounded-lg border border-white/5 flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
+                                <span className="text-sm font-medium text-gray-200">Temp: {selectedMission.difficulty.temp}°C</span>
+                            </div>
+
+                            <div className="bg-black/40 p-3 rounded-lg border border-white/5 flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]"></div>
+                                <span className="text-sm font-medium text-gray-200">Pollution: {selectedMission.difficulty.pollution}%</span>
+                            </div>
+
+                            <div className="bg-black/40 p-3 rounded-lg border border-white/5 flex items-center gap-3 col-span-2">
+                                <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]"></div>
+                                <span className="text-sm font-medium text-gray-200">Acidity (pH): {selectedMission.difficulty.virulence}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="flex gap-4 relative z-10">
-                    <button
-                        onClick={() => useGameStore.setState({ selectedMission: null })} // Close
-                        className="flex-1 py-3 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 transition-colors text-sm font-semibold"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={() => selectMission(selectedMission.id)} // Store handles switch to LAB
-                        className="flex-1 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-500/30 transition-all hover:scale-105 flex items-center justify-center gap-2"
-                    >
-                        <span>Design Organism</span>
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    </button>
-                </div>
+                    {/* Actions */}
+                    <div className="pt-4 flex gap-4">
+                        <button
+                            onClick={() => useGameStore.setState({ selectedMission: null })}
+                            className="flex-1 py-3.5 rounded-lg border border-gray-700 bg-transparent text-gray-400 font-medium hover:bg-white/5 hover:text-white transition-all duration-200"
+                        >
+                            Cancel
+                        </button>
 
+                        <button
+                            onClick={() => selectMission(selectedMission.id)}
+                            className="flex-1 py-3.5 rounded-lg bg-blue-600 text-white font-bold shadow-[0_4px_20px_rgba(37,99,235,0.4)] hover:bg-blue-500 hover:shadow-[0_4px_25px_rgba(37,99,235,0.6)] hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 group"
+                        >
+                            <span>Design Organism</span>
+                        </button>
+                    </div>
+
+                </div>
             </div>
         </div>
     );
