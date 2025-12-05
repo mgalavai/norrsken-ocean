@@ -1,103 +1,83 @@
-import { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Html, useGLTF, OrbitControls } from '@react-three/drei';
-import * as THREE from 'three';
+import { useState } from 'react';
 import { MISSIONS } from '../../data/oceanData';
 import type { Mission } from '../../data/oceanData';
 import { useGameStore } from '../../store/useGameStore';
 
-// Helper to convert Lat/Lon to Vector3 on sphere
-// Radius 2 matches the scale={2} of a standard unit sphere model
-const latLonToVector3 = (lat: number, lon: number, radius: number): [number, number, number] => {
-    const phi = (90 - lat) * (Math.PI / 180);
-    const theta = (lon + 180) * (Math.PI / 180);
-    const x = -(radius * Math.sin(phi) * Math.cos(theta));
-    const z = (radius * Math.sin(phi) * Math.sin(theta));
-    const y = (radius * Math.cos(phi));
-    return [x, y, z];
+// Helper: Equirectangular projection
+// Map (Lat, Lon) -> (X%, Y%)
+// Longitude: -180 to 180 -> 0% to 100%
+// Latitude: 90 to -90 -> 0% to 100%
+const getMissionStyle = (lat: number, lon: number) => {
+    const x = ((lon + 180) / 360) * 100;
+    const y = ((90 - lat) / 180) * 100;
+    return { left: `${x}%`, top: `${y}%` };
 };
 
 const MissionPin = ({ mission, onClick }: { mission: Mission, onClick: () => void }) => {
-    // Exact surface radius for scale 2 is 2. 
-    // We float it slightly above (2.02) to avoid z-fighting clipping
-    const position = latLonToVector3(mission.location[0], mission.location[1], 2.02);
     const [hovered, setHover] = useState(false);
-    const meshRef = useRef<THREE.Mesh>(null);
-
-    useFrame(({ clock }) => {
-        if (meshRef.current) {
-            const t = clock.getElapsedTime();
-            const scale = 1 + Math.sin(t * 3) * 0.2; // Pulsate
-            meshRef.current.scale.set(scale, scale, scale);
-        }
-    });
+    const style = getMissionStyle(mission.location[0], mission.location[1]);
 
     return (
-        <group position={position} lookAt={new THREE.Vector3(0, 0, 0)}>
+        <div
+            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+            style={style}
+            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+        >
             {/* The Dot */}
-            <mesh
-                ref={meshRef}
-                onClick={(e) => { e.stopPropagation(); onClick(); }}
-                onPointerOver={() => setHover(true)}
-                onPointerOut={() => setHover(false)}
-            >
-                <sphereGeometry args={[0.04, 16, 16]} />
-                <meshBasicMaterial color={hovered ? '#ffffff' : '#00ffff'} toneMapped={false} />
-            </mesh>
+            <div className={`w-3 h-3 rounded-full transition-shadow duration-300 ${hovered ? 'bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]' : 'bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)] animate-pulse'}`} />
 
-            {/* Glow Halo */}
-            <mesh>
-                <sphereGeometry args={[0.06, 16, 16]} />
-                <meshBasicMaterial color="#00ffff" transparent opacity={0.3} toneMapped={false} />
-            </mesh>
+            {/* Ripple/Sonar Effect */}
+            <div className="absolute top-0 left-0 w-3 h-3 rounded-full border border-cyan-500 animate-ping opacity-75" />
 
-            <Html distanceFactor={10} zIndexRange={[100, 0]} style={{ pointerEvents: 'none' }}>
-                <div
-                    className={`px-2 py-1 bg-black/80 border border-cyan-500/50 rounded text-[10px] text-cyan-300 whitespace-nowrap transition-opacity ${hovered ? 'opacity-100' : 'opacity-0'}`}
-                    style={{ transform: 'translate3d(-50%, -150%, 0)' }}
-                >
-                    {mission.title}
-                </div>
-            </Html>
-        </group>
+            {/* Tooltip */}
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-black/90 border border-cyan-500/30 rounded text-xs text-cyan-100 whitespace-nowrap pointer-events-none transition-all duration-200 ${hovered ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
+                {mission.title}
+            </div>
+        </div>
     );
 };
+
+import { GlobalStatusPanel } from './GlobalStatusPanel';
 
 export const WorldScene = () => {
     const missions = useGameStore(state => state.missions || MISSIONS);
     const setSelectedMission = (m: Mission) => useGameStore.setState({ selectedMission: m });
-    const { scene } = useGLTF('/realistic_earth_8k.glb');
 
     return (
-        <group>
-            {/* Controls: Drag to rotate, No zoom, No Pan */}
-            <OrbitControls
-                enableZoom={false}
-                enablePan={false}
-                rotateSpeed={0.6}
-                minPolarAngle={0}
-                maxPolarAngle={Math.PI}
-            />
+        <div className="w-full h-full bg-gray-950 flex items-center justify-center overflow-hidden relative selection:bg-none select-none">
 
-            <ambientLight intensity={1.5} />
-            <pointLight position={[10, 10, 10]} intensity={2.5} color="#ffffff" />
-            <pointLight position={[-10, -10, -5]} intensity={0.5} color="#4400ff" />
+            <GlobalStatusPanel />
 
-            {/* The Clean Globe Model */}
-            <primitive
-                object={scene}
-                scale={2}
-                rotation={[0, 0, 0]} // Reset rotation
-            />
+            {/* Map Container - Aspect Ratio 2:1 (Equirectangular) */}
+            <div className="relative w-full aspect-[2/1] bg-black/50 border border-white/5 shadow-2xl rounded-sm overflow-hidden group">
 
-            {/* Pins */}
-            {missions.map(mission => (
-                <MissionPin
-                    key={mission.id}
-                    mission={mission}
-                    onClick={() => setSelectedMission(mission)}
+                {/* Background Map Image */}
+                <img
+                    src="/flat_world_map.png"
+                    alt="World Map"
+                    className="w-full h-full object-cover opacity-80"
+                    draggable={false}
                 />
-            ))}
-        </group>
+
+                {/* Grid Overlay */}
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+                <div className="absolute inset-0 border border-cyan-900/20 pointer-events-none"></div>
+
+                {/* Pins Layer */}
+                {missions.map(mission => (
+                    <MissionPin
+                        key={mission.id}
+                        mission={mission}
+                        onClick={() => setSelectedMission(mission)}
+                    />
+                ))}
+
+            </div>
+
+            {/* Background Ambience */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/80 via-transparent to-black/80"></div>
+        </div>
     );
 };

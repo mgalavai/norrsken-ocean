@@ -33,18 +33,9 @@ function App() {
 
       {view === 'WORLD' && (
         <>
-          <Canvas>
-            <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={45} />
-            <color attach="background" args={['#000000']} />
-            <Suspense fallback={null}>
-              <WorldScene />
-            </Suspense>
-            <OrbitControls enableZoom={true} minDistance={3.5} maxDistance={10} enablePan={false} />
-            <Stars radius={300} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-          </Canvas>
-          <div className="absolute top-8 left-8 pointer-events-none">
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">ECO-SYNTHESIS</h1>
-            <p className="text-gray-400 text-sm tracking-widest mt-2 uppercase">Global Monitoring Network</p>
+          {/* Explicitly force full viewport for World Scene */}
+          <div className="fixed inset-0 w-full h-full z-10 bg-gray-950 flex items-center justify-center">
+            <WorldScene />
           </div>
           <MissionBriefing />
         </>
