@@ -17,6 +17,8 @@ export const SimulationUI = () => {
     useEffect(() => {
         if (view !== 'SIMULATION') return;
 
+        const timeouts: number[] = [];
+
         // Reset state
         setProgress(0);
         setStatus('RUNNING');
@@ -40,13 +42,13 @@ export const SimulationUI = () => {
             const deficit = req.value - req.orgValue;
             if (deficit > 0) {
                 survivalScore -= deficit * 0.5; // Each point of deficit reduces survival by 0.5%
-                setTimeout(() => {
+                timeouts.push(window.setTimeout(() => {
                     setLogs(l => [...l.slice(-4), `⚠ ${req.stat} stress detected (${req.value}% vs ${req.orgValue.toFixed(0)}%)`]);
-                }, Math.random() * 2000);
+                }, Math.random() * 2000));
             } else {
-                setTimeout(() => {
+                timeouts.push(window.setTimeout(() => {
                     setLogs(l => [...l.slice(-4), `✓ ${req.stat} adaptation successful`]);
-                }, Math.random() * 2000);
+                }, Math.random() * 2000));
             }
         });
 
@@ -77,9 +79,11 @@ export const SimulationUI = () => {
             });
         }, 100); // Tick every 100ms
 
-        return () => clearInterval(interval);
-
-    }, [view, currentOrganism, selectedMission]);
+        return () => {
+            clearInterval(interval);
+            timeouts.forEach(clearTimeout);
+        };
+    }, [view, currentOrganism, selectedMission, completeMission, status]);
 
     if (view === 'RESULT') {
         const isSuccess = selectedMission?.status === 'COMPLETED';

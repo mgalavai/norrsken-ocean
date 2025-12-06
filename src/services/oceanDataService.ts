@@ -76,10 +76,11 @@ async function fetchNASA_SST(lat: number, lon: number): Promise<number | null> {
             datasetId: data.feed?.entry?.[0]?.dataset_id
         });
 
-        // For MVP, we simulate SST based on location since parsing NetCDF in browser is complex
-        // In production, you'd use a backend service to extract actual values
+        // INTENTIONAL: For MVP, we verify NASA API connectivity but use simulation for actual SST values
+        // Reason: Parsing NetCDF data in browser requires backend service or specialized library
+        // TODO: Implement backend endpoint to extract actual SST values from NetCDF granules
         console.log('ℹ️ Using simulation (NetCDF parsing requires backend)');
-        return null; // Trigger fallback
+        return null; // Triggers simulation fallback
 
     } catch (error) {
         console.error('❌ NASA API error:', error);

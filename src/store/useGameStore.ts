@@ -37,7 +37,6 @@ interface GameState {
     setView: (view: GameView) => void;
     selectMission: (missionId: string) => void;
     setFoldingState: (x: number, y: number) => void;
-    toggleModuleInSlot: (index: number, module: BioModule) => void;
     clearOrganism: () => void;
     completeMission: (success: boolean) => void;
     loadDynamicMissions: () => Promise<void>;
@@ -103,9 +102,6 @@ export const useGameStore = create<GameState>((set) => ({
         };
     }),
 
-    // Removed manual toggleModuleInSlot as we use matrix now.
-    // Keeping clearOrganism logic simple
-    toggleModuleInSlot: () => { },
     clearOrganism: () => set({ foldingState: { x: 0, y: 0 }, currentOrganism: { sequence: [], attributes: { heatRes: 0, integrity: 0, growth: 0, filtration: 0 } } }),
 
     completeMission: (success) => set((state) => {

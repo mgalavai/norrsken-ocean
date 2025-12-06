@@ -1,10 +1,28 @@
-// import { useRef, useState } from 'react'; // React import removed as no hooks used
 import { useGameStore } from '../../store/useGameStore';
+
+// Alert level colors and labels
+const ALERT_STYLES = {
+    0: { color: 'text-green-400', bg: 'bg-green-500/20', label: 'NO STRESS', border: 'border-green-500/30' },
+    1: { color: 'text-yellow-400', bg: 'bg-yellow-500/20', label: 'WATCH', border: 'border-yellow-500/30' },
+    2: { color: 'text-orange-400', bg: 'bg-orange-500/20', label: 'WARNING', border: 'border-orange-500/30' },
+    3: { color: 'text-red-400', bg: 'bg-red-500/20', label: 'ALERT L1', border: 'border-red-500/30' },
+    4: { color: 'text-red-600', bg: 'bg-red-600/20', label: 'ALERT L2', border: 'border-red-600/30' }
+};
 
 export const MissionBriefing = () => {
     const { selectedMission, selectMission } = useGameStore();
 
     if (!selectedMission) return null;
+
+    // Calculate alert level from difficulty (reverse engineering from missionGenerator)
+    const dhw = selectedMission.difficulty.virulence / 10;
+    let alertLevel = 0;
+    if (dhw >= 8) alertLevel = 4;
+    else if (dhw >= 6) alertLevel = 3;
+    else if (dhw >= 4) alertLevel = 2;
+    else if (dhw >= 2) alertLevel = 1;
+
+    const alertStyle = ALERT_STYLES[alertLevel as keyof typeof ALERT_STYLES];
 
     return (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -25,9 +43,16 @@ export const MissionBriefing = () => {
                 {/* Content Container */}
                 <div className="relative z-10 p-8 space-y-6">
 
-                    {/* Header */}
-                    <div className="space-y-2">
-                        <h2 className="text-3xl font-bold text-white tracking-tight">{selectedMission.title}</h2>
+                    {/* Header with Alert Badge */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-3xl font-bold text-white tracking-tight">{selectedMission.title}</h2>
+                            <div className={`px-3 py-1 rounded-full ${alertStyle.bg} ${alertStyle.border} border`}>
+                                <span className={`text-xs font-bold ${alertStyle.color} uppercase tracking-wider`}>
+                                    {alertStyle.label}
+                                </span>
+                            </div>
+                        </div>
                         <div className="h-1 w-24 bg-blue-600 rounded-full"></div>
                     </div>
 
@@ -36,24 +61,62 @@ export const MissionBriefing = () => {
                         {selectedMission.description}
                     </p>
 
-                    {/* Threats Stats */}
+                    {/* Ocean Data Stats */}
                     <div className="space-y-3">
-                        <h3 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-3">Environmental Threats</h3>
+                        <h3 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-3">Ocean Conditions</h3>
 
                         <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-black/40 p-3 rounded-lg border border-white/5 flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
-                                <span className="text-sm font-medium text-gray-200">Temp: {selectedMission.difficulty.temp}°C</span>
+                            {/* SST */}
+                            <div className="bg-black/40 p-3 rounded-lg border border-white/5">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
+                                    <span className="text-xs text-gray-400 uppercase">Sea Temp</span>
+                                </div>
+                                <span className="text-lg font-bold text-white">{selectedMission.difficulty.temp}°C</span>
                             </div>
 
-                            <div className="bg-black/40 p-3 rounded-lg border border-white/5 flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]"></div>
-                                <span className="text-sm font-medium text-gray-200">Pollution: {selectedMission.difficulty.pollution}%</span>
+                            {/* DHW */}
+                            <div className="bg-black/40 p-3 rounded-lg border border-white/5">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className={`w-2 h-2 rounded-full ${alertLevel >= 2 ? 'bg-orange-500' : 'bg-yellow-400'} shadow-[0_0_8px_rgba(250,204,21,0.6)]`}></div>
+                                    <span className="text-xs text-gray-400 uppercase">DHW</span>
+                                </div>
+                                <span className="text-lg font-bold text-white">{dhw.toFixed(1)}</span>
+                                <span className="text-xs text-gray-500 ml-1">weeks</span>
                             </div>
 
-                            <div className="bg-black/40 p-3 rounded-lg border border-white/5 flex items-center gap-3 col-span-2">
-                                <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]"></div>
-                                <span className="text-sm font-medium text-gray-200">Acidity (pH): {selectedMission.difficulty.virulence}</span>
+                            {/* Pollution */}
+                            <div className="bg-black/40 p-3 rounded-lg border border-white/5">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]"></div>
+                                    <span className="text-xs text-gray-400 uppercase">Pollution</span>
+                                </div>
+                                <span className="text-lg font-bold text-white">{selectedMission.difficulty.pollution}%</span>
+                            </div>
+
+                            {/* Acidity */}
+                            <div className="bg-black/40 p-3 rounded-lg border border-white/5">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]"></div>
+                                    <span className="text-xs text-gray-400 uppercase">Acidity</span>
+                                </div>
+                                <span className="text-lg font-bold text-white">{selectedMission.difficulty.virulence}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Reward Info */}
+                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <div className="text-xs text-blue-400 uppercase tracking-wider mb-1">Mission Reward</div>
+                                <div className="text-2xl font-bold text-white">{selectedMission.rewards} SP</div>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-xs text-gray-400">Severity</div>
+                                <div className={`text-sm font-bold ${alertStyle.color}`}>
+                                    {alertLevel === 4 ? 'CRITICAL' : alertLevel === 3 ? 'HIGH' : alertLevel === 2 ? 'MODERATE' : alertLevel === 1 ? 'LOW' : 'MINIMAL'}
+                                </div>
                             </div>
                         </div>
                     </div>
