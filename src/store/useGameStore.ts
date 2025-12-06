@@ -70,7 +70,7 @@ export const useGameStore = create<GameState>((set) => ({
         view: 'LAB' // Auto switch to Lab when mission selected
     })),
 
-    setFoldingState: (x, y) => set((state) => {
+    setFoldingState: (x, y) => set(() => {
         // Calculate derived stats
         // Top (Y=1): Heat, Bottom (Y=-1): Integrity
         // Right (X=1): Filtration, Left (X=-1): Growth
@@ -110,6 +110,9 @@ export const useGameStore = create<GameState>((set) => ({
     completeMission: (success) => set((state) => {
         if (!state.selectedMission) return state;
 
+        // Calculate evolution cost
+        const evolutionCost = Math.round((Math.abs(state.foldingState.x) + Math.abs(state.foldingState.y)) * 100);
+
         // 1. Calculate World Degradation (Time passing)
         // Every mission adds stress to non-addressed areas
         let newStats = {
@@ -137,9 +140,14 @@ export const useGameStore = create<GameState>((set) => ({
             }
         }
 
+        // Calculate SP changes
+        const spGained = success ? state.selectedMission.rewards : 0;
+        const spLost = evolutionCost;
+        const netSP = spGained - spLost;
+
         return {
             view: 'RESULT',
-            sciencePoints: success ? state.sciencePoints + state.selectedMission.rewards : state.sciencePoints,
+            sciencePoints: state.sciencePoints + netSP,
             globalStats: newStats,
             missions: state.missions.map(m =>
                 m.id === state.selectedMission?.id

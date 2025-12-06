@@ -17,35 +17,41 @@ export const SimulationUI = () => {
     useEffect(() => {
         if (view !== 'SIMULATION') return;
 
-        // SIMULATION LOGIC
-        // Compare stats
-        const orgStats = currentOrganism.modules.reduce((acc, m) => ({
-            heatRes: acc.heatRes + m.stats.heatRes,
-            integrity: acc.integrity + m.stats.structuralIntegrity,
-            growth: acc.growth + m.stats.growthRate,
-            filtration: acc.filtration + m.stats.filtration
-        }), { heatRes: 0, integrity: 0, growth: 0, filtration: 0 });
+        // Reset state
+        setProgress(0);
+        setStatus('RUNNING');
+        setLogs(['Deploying organisms...']);
 
+        // SIMULATION LOGIC
+        const orgStats = currentOrganism.attributes;
         const difficulty = selectedMission?.difficulty || { temp: 0, virulence: 0, pollution: 0, currents: 0 };
 
-        // Win Factors
-        // 1. Heat check
-        let survivalRate = 1.0;
-        let reasons = [];
+        // Calculate success probability based on stat matching
+        let survivalScore = 100;
+        const requirements: { stat: string; value: number; orgValue: number }[] = [
+            { stat: 'Temperature', value: difficulty.temp, orgValue: orgStats.heatRes },
+            { stat: 'Acidity', value: difficulty.virulence, orgValue: orgStats.integrity },
+            { stat: 'Pollution', value: difficulty.pollution, orgValue: orgStats.filtration },
+            { stat: 'Currents', value: difficulty.currents, orgValue: orgStats.growth }
+        ];
 
-        if (orgStats.heatRes < difficulty.temp) {
-            survivalRate -= 0.05; // Fast decay
-            if (Math.random() > 0.8) reasons.push("Thermal damage detected...");
-        }
+        // Check each requirement
+        requirements.forEach(req => {
+            const deficit = req.value - req.orgValue;
+            if (deficit > 0) {
+                survivalScore -= deficit * 0.5; // Each point of deficit reduces survival by 0.5%
+                setTimeout(() => {
+                    setLogs(l => [...l.slice(-4), `⚠ ${req.stat} stress detected (${req.value}% vs ${req.orgValue.toFixed(0)}%)`]);
+                }, Math.random() * 2000);
+            } else {
+                setTimeout(() => {
+                    setLogs(l => [...l.slice(-4), `✓ ${req.stat} adaptation successful`]);
+                }, Math.random() * 2000);
+            }
+        });
 
-        if (orgStats.filtration < difficulty.pollution) {
-            survivalRate -= 0.02;
-            if (Math.random() > 0.9) reasons.push("Toxins accumulating...");
-        }
-
-        // Base growth
-        let growthSpeed = 0.5 + (orgStats.growth * 0.1);
-        if (growthSpeed < 0.1) growthSpeed = 0.1;
+        const willSucceed = survivalScore > 30; // Need at least 30% survival score
+        const growthSpeed = willSucceed ? 2 : 0.5; // Faster if successful
 
         const interval = setInterval(() => {
             if (status !== 'RUNNING') return;
@@ -53,25 +59,23 @@ export const SimulationUI = () => {
             setProgress(prev => {
                 const newProgress = prev + growthSpeed;
 
-                // Add log occasionally
-                if (Math.random() > 0.9 && reasons.length > 0) {
-                    setLogs(l => [...l.slice(-4), reasons[Math.floor(Math.random() * reasons.length)]]);
-                } else if (Math.random() > 0.95) {
-                    setLogs(l => [...l.slice(-4), "Colony expanding..."]);
+                // Add progress logs
+                if (Math.random() > 0.92) {
+                    const messages = willSucceed
+                        ? ['Colony expanding...', 'Reproduction stable...', 'Ecosystem integration positive...']
+                        : ['Growth slowing...', 'Stress markers elevated...', 'Adaptation struggling...'];
+                    setLogs(l => [...l.slice(-4), messages[Math.floor(Math.random() * messages.length)]]);
                 }
 
                 if (newProgress >= 100) {
-                    setStatus('SUCCESS');
-                    completeMission(true);
+                    setStatus(willSucceed ? 'SUCCESS' : 'FAILURE');
+                    completeMission(willSucceed);
                     clearInterval(interval);
                     return 100;
                 }
                 return newProgress;
             });
-
-            // "Damage" logic simulation would go here decreasing a separate health bar
-            // For MVP, we just use slow progress as "struggling"
-        }, 100); // Tick 100ms
+        }, 100); // Tick every 100ms
 
         return () => clearInterval(interval);
 
@@ -79,22 +83,101 @@ export const SimulationUI = () => {
 
     if (view === 'RESULT') {
         const isSuccess = selectedMission?.status === 'COMPLETED';
+        const { globalStats, foldingState } = useGameStore.getState();
+        const evolutionCost = Math.round((Math.abs(foldingState.x) + Math.abs(foldingState.y)) * 100);
+        const spGained = isSuccess ? (selectedMission?.rewards || 0) : 0;
+        const netSP = spGained - evolutionCost;
+
         return (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/90 p-8">
-                <div className="text-center">
-                    <h1 className={`text-6xl font-bold mb-4 ${isSuccess ? 'text-green-500' : 'text-red-500'}`}>
-                        {isSuccess ? 'MISSION SUCCESS' : 'MISSION FAILED'}
-                    </h1>
-                    <p className="text-xl text-white mb-8">
-                        {isSuccess
-                            ? `Ecosystem stabilizing. Earned ${selectedMission?.rewards} Science Points.`
-                            : "Organism failed to adapt to environmental stressors."}
-                    </p>
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 p-8">
+                <div className="max-w-2xl w-full">
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                        <h1 className={`text-6xl font-bold mb-4 ${isSuccess ? 'text-green-500' : 'text-red-500'}`}>
+                            {isSuccess ? 'MISSION SUCCESS' : 'MISSION FAILED'}
+                        </h1>
+                        <p className="text-xl text-gray-400">
+                            {selectedMission?.title}
+                        </p>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                        {/* Global Impact */}
+                        <div className="bg-gray-900/80 border border-white/10 rounded-lg p-6">
+                            <h3 className="text-cyan-400 font-bold mb-4 uppercase tracking-wider text-sm">Global Impact</h3>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Temperature</span>
+                                    <span className={globalStats.temperature < 50 ? 'text-green-400' : 'text-red-400'}>
+                                        {globalStats.temperature.toFixed(0)}%
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Toxicity</span>
+                                    <span className={globalStats.toxicity < 50 ? 'text-green-400' : 'text-red-400'}>
+                                        {globalStats.toxicity.toFixed(0)}%
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Acidity</span>
+                                    <span className={globalStats.acidity < 50 ? 'text-green-400' : 'text-red-400'}>
+                                        {globalStats.acidity.toFixed(0)}%
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Extinction Risk</span>
+                                    <span className={globalStats.extinctionRisk < 50 ? 'text-green-400' : 'text-red-400'}>
+                                        {globalStats.extinctionRisk.toFixed(0)}%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Science Points */}
+                        <div className="bg-gray-900/80 border border-white/10 rounded-lg p-6">
+                            <h3 className="text-cyan-400 font-bold mb-4 uppercase tracking-wider text-sm">Resources</h3>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">Evolution Cost</span>
+                                    <span className="text-red-400">-{evolutionCost} SP</span>
+                                </div>
+                                {isSuccess && (
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-400">Mission Reward</span>
+                                        <span className="text-green-400">+{spGained} SP</span>
+                                    </div>
+                                )}
+                                <div className="h-px bg-white/10 my-2"></div>
+                                <div className="flex justify-between font-bold">
+                                    <span className="text-white">Net Change</span>
+                                    <span className={netSP >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                        {netSP >= 0 ? '+' : ''}{netSP} SP
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Summary Message */}
+                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 mb-8">
+                        <p className="text-blue-200 text-center">
+                            {isSuccess
+                                ? "The ecosystem is responding positively. Your organisms have successfully adapted and are beginning to restore balance."
+                                : "The organisms failed to establish a stable colony. The environmental stressors were too severe for the current design."}
+                        </p>
+                    </div>
+
+                    {/* Action Button */}
                     <button
-                        onClick={() => setView('WORLD')}
-                        className="bg-white text-black px-8 py-3 rounded-full font-bold text-lg hover:scale-105 transition-transform"
+                        onClick={() => {
+                            setView('WORLD');
+                            // Clear the selected mission to close the briefing modal
+                            useGameStore.setState({ selectedMission: null });
+                        }}
+                        className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 rounded uppercase tracking-widest shadow-[0_0_20px_rgba(8,145,178,0.4)] transition-all hover:scale-[1.02]"
                     >
-                        Return to Orbit
+                        Return to World Map
                     </button>
                 </div>
             </div>

@@ -66,7 +66,7 @@ export const DeploymentScene = () => {
             {/* The Colony */}
             {colonyPositions.map((pos, i) => (
                 <Float key={i} speed={1 + Math.random()} rotationIntensity={1} floatIntensity={1}>
-                    <OrganismInstance position={pos} modules={currentOrganism.modules} />
+                    <OrganismInstance position={pos} modules={currentOrganism.sequence.filter(m => m !== null)} />
                 </Float>
             ))}
 
