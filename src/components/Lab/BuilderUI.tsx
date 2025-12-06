@@ -25,7 +25,7 @@ export const BuilderUI = () => {
                     {/* Matrix Controller - positioned over the tablet screen */}
                     <div
                         className="absolute pointer-events-auto"
-                        style={{ top: '388px', left: '362px', transform: 'translate(-50%, -50%)' }}
+                        style={{ top: '398px', left: '374px', transform: 'translate(-50%, -50%)' }}
                     >
                         <ProteinMatrix />
                     </div>
