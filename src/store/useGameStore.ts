@@ -44,7 +44,7 @@ interface GameState {
     resetGame: () => void;
 }
 
-export const useGameStore = create<GameState>((set) => ({
+export const useGameStore = create<GameState>((set, get) => ({
     view: 'MENU', // Start at Menu
     sciencePoints: 100, // Starting points
     selectedMission: null,
@@ -68,24 +68,28 @@ export const useGameStore = create<GameState>((set) => ({
 
     setView: (view) => set({ view }),
 
-    resetGame: () => set({
-        view: 'WORLD',
-        hasStarted: true,
-        sciencePoints: 100,
-        selectedMission: null,
-        missions: MISSIONS, // Should reload dynamic missions ideally, but resetting to default/empty is safe
-        globalStats: {
-            temperature: 40,
-            toxicity: 30,
-            acidity: 20,
-            extinctionRisk: 25
-        },
-        currentOrganism: {
-            sequence: Array(15).fill(null),
-            attributes: { heatRes: 50, integrity: 50, growth: 50, filtration: 50 }
-        },
-        foldingState: { x: 0, y: 0 }
-    }),
+    resetGame: () => {
+        set({
+            view: 'WORLD',
+            hasStarted: true,
+            sciencePoints: 100,
+            selectedMission: null,
+            missions: MISSIONS, // Temporary reset while loading
+            globalStats: {
+                temperature: 40,
+                toxicity: 30,
+                acidity: 20,
+                extinctionRisk: 25
+            },
+            currentOrganism: {
+                sequence: Array(15).fill(null),
+                attributes: { heatRes: 50, integrity: 50, growth: 50, filtration: 50 }
+            },
+            foldingState: { x: 0, y: 0 }
+        });
+        // Reload dynamic missions to replace the default static ones
+        get().loadDynamicMissions();
+    },
 
     selectMission: (missionId) => set((state) => ({
         selectedMission: state.missions.find(m => m.id === missionId) || null,
