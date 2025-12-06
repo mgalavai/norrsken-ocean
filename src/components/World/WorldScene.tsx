@@ -3,6 +3,7 @@ import { MISSIONS } from '../../data/oceanData';
 import type { Mission } from '../../data/oceanData';
 import { useGameStore } from '../../store/useGameStore';
 import { fetchOceanTemperatureData } from '../../services/oceanDataService';
+import { GlobalStatusPanel } from './GlobalStatusPanel';
 
 // Helper: Equirectangular projection
 // Map (Lat, Lon) -> (X%, Y%)
@@ -39,13 +40,6 @@ const MissionPin = ({ mission, onClick }: { mission: Mission, onClick: () => voi
         </div>
     );
 };
-
-import { useState, useEffect } from 'react';
-import { MISSIONS } from '../../data/oceanData';
-import type { Mission } from '../../data/oceanData';
-import { useGameStore } from '../../store/useGameStore';
-import { fetchOceanTemperatureData } from '../../services/oceanDataService';
-import { GlobalStatusPanel } from './GlobalStatusPanel';
 
 export const WorldScene = () => {
     const missions = useGameStore(state => state.missions || MISSIONS);
