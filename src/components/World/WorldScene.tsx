@@ -19,24 +19,60 @@ const MissionPin = ({ mission, onClick }: { mission: Mission, onClick: () => voi
     const [hovered, setHover] = useState(false);
     const style = getMissionStyle(mission.location[0], mission.location[1]);
 
+    const isCompleted = mission.status === 'COMPLETED';
+    const isFailed = mission.status === 'FAILED';
+    const isAvailable = mission.status === 'AVAILABLE';
+
+    // Different styles based on status
+    let pinColor = 'bg-cyan-400';
+    let shadowColor = 'shadow-[0_0_10px_rgba(34,211,238,0.5)]';
+    let animation = 'animate-pulse';
+
+    if (isCompleted) {
+        pinColor = 'bg-green-500';
+        shadowColor = 'shadow-[0_0_10px_rgba(34,197,94,0.5)]';
+        animation = ''; // No pulse for completed
+    } else if (isFailed) {
+        pinColor = 'bg-red-500';
+        shadowColor = 'shadow-[0_0_10px_rgba(239,68,68,0.5)]';
+        animation = '';
+    }
+
     return (
         <div
-            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+            className={`absolute -translate-x-1/2 -translate-y-1/2 group ${isAvailable ? 'cursor-pointer z-10' : 'cursor-default z-0 opacity-60'}`}
             style={style}
-            onClick={(e) => { e.stopPropagation(); onClick(); }}
+            onClick={(e) => {
+                e.stopPropagation();
+                if (isAvailable) onClick();
+            }}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
         >
             {/* The Dot */}
-            <div className={`w-3 h-3 rounded-full transition-shadow duration-300 ${hovered ? 'bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]' : 'bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)] animate-pulse'}`} />
+            <div className={`w-3 h-3 rounded-full transition-all duration-300 ${pinColor} ${shadowColor} ${animation} ${hovered && isAvailable ? 'scale-125 bg-white' : ''}`} />
 
-            {/* Ripple/Sonar Effect */}
-            <div className="absolute top-0 left-0 w-3 h-3 rounded-full border border-cyan-500 animate-ping opacity-75" />
+            {/* Ripple/Sonar Effect (Only for Available) */}
+            {isAvailable && (
+                <div className="absolute top-0 left-0 w-3 h-3 rounded-full border border-cyan-500 animate-ping opacity-75" />
+            )}
+
+            {/* Status Icon Overlay (for Colorblindness/Clarify) */}
+            {isCompleted && <div className="absolute -top-4 -right-1 text-[8px] text-green-400 font-bold">✓</div>}
+            {isFailed && <div className="absolute -top-4 -right-1 text-[8px] text-red-500 font-bold">✕</div>}
 
             {/* Tooltip */}
-            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-black/90 border border-cyan-500/30 rounded text-xs text-cyan-100 whitespace-nowrap pointer-events-none transition-all duration-200 ${hovered ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
-                {mission.title}
-            </div>
+            {(hovered || isAvailable) && (
+                <div className={`
+                    absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 
+                    bg-black/90 border rounded text-xs whitespace-nowrap pointer-events-none transition-all duration-200 
+                    ${isCompleted ? 'border-green-500/30 text-green-100' : isFailed ? 'border-red-500/30 text-red-100' : 'border-cyan-500/30 text-cyan-100'}
+                    ${hovered ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}
+                `}>
+                    {mission.title}
+                    <span className="opacity-50 ml-2 text-[10px] uppercase">[{mission.status}]</span>
+                </div>
+            )}
         </div>
     );
 };
