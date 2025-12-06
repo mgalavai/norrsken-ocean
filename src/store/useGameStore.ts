@@ -40,6 +40,7 @@ interface GameState {
     toggleModuleInSlot: (index: number, module: BioModule) => void;
     clearOrganism: () => void;
     completeMission: (success: boolean) => void;
+    loadDynamicMissions: () => Promise<void>;
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -155,5 +156,12 @@ export const useGameStore = create<GameState>((set) => ({
                     : m
             )
         };
-    })
+    }),
+
+    loadDynamicMissions: async () => {
+        const { generateMissionsFromOceanData } = await import('../services/missionGenerator');
+        const dynamicMissions = await generateMissionsFromOceanData();
+        console.log('🎯 Generated dynamic missions:', dynamicMissions);
+        set({ missions: dynamicMissions });
+    }
 }));

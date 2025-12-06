@@ -3,7 +3,6 @@ import { MISSIONS } from '../../data/oceanData';
 import type { Mission } from '../../data/oceanData';
 import { useGameStore } from '../../store/useGameStore';
 import { fetchOceanTemperatureData } from '../../services/oceanDataService';
-import { TestReefPositions } from './TestReefPositions';
 
 // Helper: Equirectangular projection
 // Map (Lat, Lon) -> (X%, Y%)
@@ -47,9 +46,17 @@ export const WorldScene = () => {
     const missions = useGameStore(state => state.missions || MISSIONS);
     const setSelectedMission = (m: Mission) => useGameStore.setState({ selectedMission: m });
 
-    // Fetch NASA ocean data on mount
+    // Fetch NASA ocean data on mount and generate missions
     useEffect(() => {
         console.log('🌊 WorldScene mounted - fetching ocean data...');
+
+        // Load dynamic missions from ocean data
+        const loadDynamicMissions = useGameStore.getState().loadDynamicMissions;
+        loadDynamicMissions().then(() => {
+            console.log('✅ Dynamic missions loaded');
+        });
+
+        // Also fetch and log raw ocean data for debugging
         fetchOceanTemperatureData().then(data => {
             console.log('📊 Ocean Data Retrieved:', data);
             console.table(data.map(d => ({
@@ -91,9 +98,6 @@ export const WorldScene = () => {
                         onClick={() => setSelectedMission(mission)}
                     />
                 ))}
-
-                {/* TEST: Show all coral reef positions */}
-                <TestReefPositions />
 
             </div>
 
