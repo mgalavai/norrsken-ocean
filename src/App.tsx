@@ -4,6 +4,7 @@ import { WorldScene } from './components/World/WorldScene';
 import { MissionBriefing } from './components/World/MissionBriefing';
 import { DeploymentScene } from './components/Simulation/DeploymentScene';
 import { SimulationUI } from './components/Simulation/SimulationUI';
+import { MainMenu } from './components/UI/MainMenu';
 import { Canvas } from '@react-three/fiber';
 import { useGameStore } from './store/useGameStore';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
@@ -19,14 +20,19 @@ function App() {
         <BuilderUI />
       )}
 
-      {view === 'WORLD' && (
+      {view === 'MENU' && <MainMenu />}
+
+      {(view === 'WORLD' || view === 'MENU') && (
         <>
           {/* Explicitly force full viewport for World Scene */}
           <div className="fixed inset-0 w-full h-full z-10 bg-gray-950 flex items-center justify-center">
             <WorldScene />
           </div>
-          <MissionBriefing />
         </>
+      )}
+
+      {view === 'WORLD' && (
+        <MissionBriefing />
       )}
 
       {(view === 'SIMULATION' || view === 'RESULT') && (

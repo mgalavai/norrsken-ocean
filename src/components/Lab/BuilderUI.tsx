@@ -168,7 +168,7 @@ export const BuilderUI = () => {
                     <div className="border-t border-white/10 pt-6 space-y-4 mt-8">
                         <button
                             onClick={() => setView('WORLD')}
-                            className="w-full py-3 rounded border border-gray-600 text-gray-400 hover:text-white hover:bg-white/5 transition-colors uppercase tracking-widest text-xs"
+                            className="w-full py-4 rounded-sm border border-cyan-500/30 text-cyan-400 font-bold hover:bg-cyan-500/10 hover:border-cyan-500/50 hover:text-cyan-200 transition-all uppercase tracking-widest text-xs"
                         >
                             Abort Sequence
                         </button>
@@ -180,7 +180,7 @@ export const BuilderUI = () => {
                                 }
                             }}
                             disabled={!canAfford}
-                            className={`w-full py-4 font-bold rounded uppercase tracking-[0.2em] transition-all hover:scale-[1.02] ${canAfford
+                            className={`w-full py-4 font-bold rounded-sm uppercase tracking-widest text-xs transition-all hover:scale-[1.02] ${canAfford
                                 ? 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(8,145,178,0.4)]'
                                 : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                                 }`}

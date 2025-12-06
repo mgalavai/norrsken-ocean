@@ -27,7 +27,7 @@ export const GlobalStatusPanel = () => {
             <div className="container mx-auto mt-4 p-4 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl flex justify-between items-center gap-8 pointer-events-auto">
 
                 <div className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] border-r border-white/10 pr-6">
-                    Planet Status
+                    OCEAN STATUS
                 </div>
 
                 <div className="flex flex-1 justify-between gap-8">

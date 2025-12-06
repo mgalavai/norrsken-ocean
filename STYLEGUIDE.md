@@ -1,12 +1,13 @@
-# Eco-Synthesis Style & Contribution Guide
+# Bio-Architect Style & Contribution Guide
 
 ## Visual Design System
-*   **Aesthetic**: "Code-Generated Sci-Fi" but with a **Solid 2D Interface**.
-*   **Colors**: High contrast. Deep blacks/grays for backgrounds (`bg-gray-900`, `bg-black`), bright neons for data (`text-cyan-400`, `text-green-500`).
+*   **Aesthetic**: "Scientific/Cyber Protocol". sleek, glassmorphic, and high-tech.
+*   **Colors**: Deep blacks/voids (`bg-black/90`), primary accents in Cyan (`text-cyan-400`, `border-cyan-500`).
 *   **UI Components:**
-    *   No glassmorphism (avoid `backdrop-blur`).
-    *   Solid, opaque panels with subtle borders (`border-gray-700`).
-    *   Sharp corners or slightly rounded (`rounded-lg`), avoid pill-shapes unless for buttons.
+    *   **Glassmorphism**: Encouraged (`backdrop-blur-md`, `bg-black/50`).
+    *   **Borders**: Thin, technical borders (`border-white/10`, `border-cyan-500/30`).
+    *   **Shapes**: Sharp corners (`rounded-sm`), tech-inspired geometric accents.
+    *   **Typography**: Monospace for data (`font-mono`), bold display fonts for headers.
 
 ## Code Standards
 

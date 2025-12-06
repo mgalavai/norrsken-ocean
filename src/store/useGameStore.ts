@@ -3,13 +3,14 @@ import type { BioModule } from '../data/modules';
 import { MISSIONS } from '../data/oceanData';
 import type { Mission } from '../data/oceanData';
 
-export type GameView = 'WORLD' | 'LAB' | 'SIMULATION' | 'RESULT';
+export type GameView = 'MENU' | 'WORLD' | 'LAB' | 'SIMULATION' | 'RESULT';
 
 interface GameState {
     view: GameView;
     sciencePoints: number;
     selectedMission: Mission | null;
     missions: Mission[];
+    hasStarted: boolean; // Track if game has been started at least once
 
     // Lab State
     currentOrganism: {
@@ -40,13 +41,15 @@ interface GameState {
     clearOrganism: () => void;
     completeMission: (success: boolean) => void;
     loadDynamicMissions: () => Promise<void>;
+    resetGame: () => void;
 }
 
 export const useGameStore = create<GameState>((set) => ({
-    view: 'WORLD',
+    view: 'MENU', // Start at Menu
     sciencePoints: 100, // Starting points
     selectedMission: null,
     missions: MISSIONS,
+    hasStarted: false,
 
     // Initial World State (Already in trouble)
     globalStats: {
@@ -64,6 +67,25 @@ export const useGameStore = create<GameState>((set) => ({
     foldingState: { x: 0, y: 0 },
 
     setView: (view) => set({ view }),
+
+    resetGame: () => set({
+        view: 'WORLD',
+        hasStarted: true,
+        sciencePoints: 100,
+        selectedMission: null,
+        missions: MISSIONS, // Should reload dynamic missions ideally, but resetting to default/empty is safe
+        globalStats: {
+            temperature: 40,
+            toxicity: 30,
+            acidity: 20,
+            extinctionRisk: 25
+        },
+        currentOrganism: {
+            sequence: Array(15).fill(null),
+            attributes: { heatRes: 50, integrity: 50, growth: 50, filtration: 50 }
+        },
+        foldingState: { x: 0, y: 0 }
+    }),
 
     selectMission: (missionId) => set((state) => ({
         selectedMission: state.missions.find(m => m.id === missionId) || null,

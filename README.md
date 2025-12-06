@@ -1,73 +1,23 @@
-# React + TypeScript + Vite
+# Bio-Architect: Global Restoration Initiative
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Bio-Architect** is a scientific strategy simulation where you act as a bio-engineer tasked with restoring Earth's collapsed ecosystems. Using the Protein Matrix, you synthesize novel organisms capable of surviving extreme climate conditions—rising temperatures, acidity, and pollution—to re-stabilize the planetary biosphere.
 
-Currently, two official plugins are available:
+## Core Features
+- **Global Climate Simulation**: Real-time integration of NASA/NOAA data (SST, Bleaching Alerts, Bathymetry) to generate mission parameters.
+- **Protein Matrix Lab**: A drag-and-drop variation of the "15-puzzle" to synthesize organism genetic sequences.
+- **Organism Deployment**: Deploy your creations into 3D ocean environments and watch them adapt or fail against environmental stressors.
+- **Cyber-Scientific UI**: A sleek, glassmorphic interface inspired by advanced research protocols.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
+- **Framework**: React + TypeScript + Vite
+- **State Management**: Zustand
+- **3D Engine**: Three.js + React Three Fiber
+- **Styling**: Tailwind CSS
+- **Data**: NASA JPL MUR SST, NOAA Coral Reef Watch
 
-## React Compiler
+## Getting Started
+1. `npm install`
+2. `npm run dev`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Status
+v0.9.2-BETA // NORRSKEN
