@@ -13,10 +13,10 @@ const ALERT_STYLES = {
 export const MissionBriefing = () => {
     const { selectedMission, selectMission } = useGameStore();
 
-    if (!selectedMission) return null;
-
     // ESC key to close modal
     useEffect(() => {
+        if (!selectedMission) return;
+
         const handleEsc = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
                 useGameStore.setState({ selectedMission: null });
@@ -24,7 +24,9 @@ export const MissionBriefing = () => {
         };
         window.addEventListener('keydown', handleEsc);
         return () => window.removeEventListener('keydown', handleEsc);
-    }, []);
+    }, [selectedMission]);
+
+    if (!selectedMission) return null;
 
     // Calculate alert level from difficulty (reverse engineering from missionGenerator)
     const dhw = selectedMission.difficulty.virulence / 10;

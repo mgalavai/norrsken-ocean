@@ -16,8 +16,10 @@ export const ProteinMatrix = () => {
     // CSS Left = (x + 1) / 2 * 100%
 
     const getCssPosition = (x: number, y: number) => ({
-        left: `${((x + 1) / 2) * 100}%`,
-        top: `${((1 - y) / 2) * 100}%`
+        // Map -1..1 to 0..1 fraction
+        // Scale by (100% - 24px) so the 24px puck stays strictly inside the container
+        left: `calc((100% - 24px) * ${(x + 1) / 2})`,
+        top: `calc((100% - 24px) * ${(1 - y) / 2})`
     });
 
     const handlePointer = (e: React.PointerEvent | PointerEvent) => {
@@ -25,6 +27,13 @@ export const ProteinMatrix = () => {
         const rect = containerRef.current.getBoundingClientRect();
         const clientX = e.clientX;
         const clientY = e.clientY;
+
+        // Invert the clamping logic for input:
+        // We want the cursor center to map to x/y.
+        // But visually we clamped it.
+        // Actually, for interaction, standard full-width mapping is fine/preferred.
+        // The user clicks "Right Edge", x becomes 1. Visual clamps to "Almost Right Edge".
+        // This is standard behavior for sliders.
 
         // Normalize to -1 to 1
         let x = ((clientX - rect.left) / rect.width) * 2 - 1;
@@ -65,29 +74,36 @@ export const ProteinMatrix = () => {
             {/* The Grid Container */}
             <div
                 ref={containerRef}
-                className="w-full h-full bg-black/40 backdrop-blur-sm border-2 border-cyan-900/50 rounded-lg relative overflow-hidden cursor-crosshair shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+                className="w-full h-full bg-white/10 backdrop-blur-md relative overflow-hidden cursor-crosshair box-border"
+                style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: 'inset 0 0 60px rgba(255,255,255,0.1)'
+                }}
                 onPointerDown={(e) => {
                     setIsDragging(true);
                     handlePointer(e);
                 }}
             >
-                {/* Grid Lines */}
+                {/* Fine Grid Pattern */}
                 <div className="absolute inset-0" style={{
-                    backgroundImage: `linear-gradient(rgba(34, 211, 238, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.2) 1px, transparent 1px)`,
+                    backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px)`,
                     backgroundSize: '20px 20px',
                     backgroundPosition: 'center'
                 }} />
 
-                {/* Center Crosshair */}
-                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-cyan-500/30" />
-                <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-cyan-500/30" />
+                {/* 4 Division Lines (Quadrants) */}
+                {/* Vertical Center Line */}
+                <div className="absolute top-0 bottom-0 left-1/2 w-px bg-cyan-400/40" />
+                {/* Horizontal Center Line */}
+                <div className="absolute left-0 right-0 top-1/2 h-px bg-cyan-400/40" />
 
                 {/* The Puck/Cursor */}
                 <div
-                    className="absolute w-6 h-6 -ml-3 -mt-3 bg-cyan-500 rounded-full shadow-[0_0_15px_#06b6d4] border-2 border-white z-10 transition-transform duration-75 ease-out"
+                    className="absolute w-6 h-6 bg-cyan-400 rounded-full shadow-[0_0_20px_#22d3ee] border-2 border-white/80 z-10 transition-transform duration-75 ease-out"
                     style={{ left: pos.left, top: pos.top }}
                 >
-                    {isDragging && <div className="absolute inset-0 animate-ping rounded-full bg-cyan-400 opacity-75"></div>}
+                    {isDragging && <div className="absolute inset-0 animate-ping rounded-full bg-cyan-300 opacity-75"></div>}
                 </div>
             </div>
 

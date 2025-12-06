@@ -32,72 +32,140 @@ export const BuilderUI = () => {
                 </div>
 
                 {/* Right: UI Panel */}
-                <div className="w-[400px] flex flex-col gap-6 pointer-events-auto">
+                <div className="w-[400px] flex flex-col pointer-events-auto -mt-[100px]">
 
                     {/* Header */}
-                    <div>
+                    <div className="mb-6">
                         <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-2">
                             THE LAB
                         </h1>
-                        <div className="text-sm text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <div className="text-sm text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-3">
                             <span>Project:</span>
                             <span className="text-white font-semibold">{selectedMission?.title || 'Unknown Protocol'}</span>
                         </div>
+                        {selectedMission && (
+                            <div className="text-xs text-gray-500 leading-relaxed border-l-2 border-cyan-500/30 pl-3">
+                                <div className="mb-1">
+                                    <span className="text-gray-400">Challenge:</span> <span className="text-gray-300">{selectedMission.difficulty.temp}°C ocean temperature</span>
+                                </div>
+                                <div className="text-gray-400">
+                                    Design an organism capable of surviving extreme thermal stress and restoring ecosystem balance.
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Organism Status (Derived from Pulse Matrix) */}
-                    <div className="flex-1 space-y-8">
+                    {/* Organism Status (No card wrapper) */}
+                    <div className="flex-1 space-y-6 font-mono text-sm">
+                        <div className="flex justify-between items-center pb-4 border-b border-white/10">
+                            <span className="text-gray-400 uppercase text-xs tracking-wider">Evolution Cost</span>
+                            <span className="text-white font-bold tracking-widest">
+                                {evolutionCost} <span className="text-gray-600">/</span> <span className="text-cyan-400">{sciencePoints} SP</span>
+                            </span>
+                        </div>
 
-                        {/* Analysis Card */}
-                        <div className="bg-gray-950/90 rounded-lg p-6 border border-white/5 shadow-2xl backdrop-blur-sm">
-                            <div className="flex justify-between items-baseline mb-6">
-                                <h3 className="text-xl font-bold text-white">Analysis</h3>
-                                <span className="text-cyan-400 text-xs font-bold tracking-widest animate-pulse">LIVE</span>
+                        {/* Segmented Stat Bars */}
+                        <div className="space-y-4">
+                            {/* Heat Resistance */}
+                            <div>
+                                <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-2 flex justify-between items-center">
+                                    <span>Heat Resistance</span>
+                                    <div className="bg-red-500/20 border border-red-500/40 px-3 py-1">
+                                        <span className="text-red-400 font-bold font-mono">{currentOrganism.attributes.heatRes.toFixed(0)}%</span>
+                                    </div>
+                                </div>
+                                <div className="relative h-3 bg-black/40 border border-white/20 flex">
+                                    {Array.from({ length: 10 }).map((_, i) => {
+                                        const segmentValue = (i + 1) * 10;
+                                        const isFilled = currentOrganism.attributes.heatRes >= segmentValue;
+                                        return (
+                                            <div key={i} className="flex-1 relative border-r border-white/10 last:border-r-0">
+                                                <div className={`absolute inset-0 transition-all duration-300 ${isFilled ? 'bg-[#ef4444]' : 'bg-transparent'}`} />
+                                                {i % 2 === 1 && (
+                                                    <div className="absolute -bottom-2 left-0 w-px h-1 bg-white/30" />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
 
-                            <div className="space-y-6 font-mono text-sm">
-                                <div className="flex justify-between items-center pb-4 border-b border-white/10">
-                                    <span className="text-gray-400 uppercase text-xs tracking-wider">Evolution Cost</span>
-                                    <span className="text-white font-bold tracking-widest">
-                                        {evolutionCost} <span className="text-gray-600">/</span> <span className="text-cyan-400">{sciencePoints} SP</span>
-                                    </span>
+                            {/* Integrity */}
+                            <div>
+                                <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-2 flex justify-between items-center">
+                                    <span>Structural Integrity</span>
+                                    <div className="bg-orange-500/20 border border-orange-500/40 px-3 py-1">
+                                        <span className="text-orange-400 font-bold font-mono">{currentOrganism.attributes.integrity.toFixed(0)}%</span>
+                                    </div>
                                 </div>
+                                <div className="relative h-3 bg-black/40 border border-white/20 flex">
+                                    {Array.from({ length: 10 }).map((_, i) => {
+                                        const segmentValue = (i + 1) * 10;
+                                        const isFilled = currentOrganism.attributes.integrity >= segmentValue;
+                                        return (
+                                            <div key={i} className="flex-1 relative border-r border-white/10 last:border-r-0">
+                                                <div className={`absolute inset-0 transition-all duration-300 ${isFilled ? 'bg-[#f97316]' : 'bg-transparent'}`} />
+                                                {i % 2 === 1 && (
+                                                    <div className="absolute -bottom-2 left-0 w-px h-1 bg-white/30" />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
 
-                                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                                    <div className="text-right">
-                                        <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Heat</div>
-                                        <div className="text-red-500 font-bold text-xl">{currentOrganism.attributes.heatRes.toFixed(0)}%</div>
+                            {/* Filtration */}
+                            <div>
+                                <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-2 flex justify-between items-center">
+                                    <span>Toxin Filtration</span>
+                                    <div className="bg-purple-500/20 border border-purple-500/40 px-3 py-1">
+                                        <span className="text-purple-400 font-bold font-mono">{currentOrganism.attributes.filtration.toFixed(0)}%</span>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Integrity</div>
-                                        <div className="text-blue-500 font-bold text-xl">{currentOrganism.attributes.integrity.toFixed(0)}%</div>
+                                </div>
+                                <div className="relative h-3 bg-black/40 border border-white/20 flex">
+                                    {Array.from({ length: 10 }).map((_, i) => {
+                                        const segmentValue = (i + 1) * 10;
+                                        const isFilled = currentOrganism.attributes.filtration >= segmentValue;
+                                        return (
+                                            <div key={i} className="flex-1 relative border-r border-white/10 last:border-r-0">
+                                                <div className={`absolute inset-0 transition-all duration-300 ${isFilled ? 'bg-[#a855f7]' : 'bg-transparent'}`} />
+                                                {i % 2 === 1 && (
+                                                    <div className="absolute -bottom-2 left-0 w-px h-1 bg-white/30" />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Growth */}
+                            <div>
+                                <div className="text-[10px] text-gray-400 uppercase tracking-widest mb-2 flex justify-between items-center">
+                                    <span>Growth Rate</span>
+                                    <div className="bg-yellow-500/20 border border-yellow-500/40 px-3 py-1">
+                                        <span className="text-yellow-400 font-bold font-mono">{currentOrganism.attributes.growth.toFixed(0)}%</span>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Filtration</div>
-                                        <div className="text-purple-500 font-bold text-xl">{currentOrganism.attributes.filtration.toFixed(0)}%</div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Growth</div>
-                                        <div className="text-green-500 font-bold text-xl">{currentOrganism.attributes.growth.toFixed(0)}%</div>
-                                    </div>
+                                </div>
+                                <div className="relative h-3 bg-black/40 border border-white/20 flex">
+                                    {Array.from({ length: 10 }).map((_, i) => {
+                                        const segmentValue = (i + 1) * 10;
+                                        const isFilled = currentOrganism.attributes.growth >= segmentValue;
+                                        return (
+                                            <div key={i} className="flex-1 relative border-r border-white/10 last:border-r-0">
+                                                <div className={`absolute inset-0 transition-all duration-300 ${isFilled ? 'bg-[#eab308]' : 'bg-transparent'}`} />
+                                                {i % 2 === 1 && (
+                                                    <div className="absolute -bottom-2 left-0 w-px h-1 bg-white/30" />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
-
-                        <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded text-xs text-blue-200 leading-relaxed">
-                            <strong className="block mb-1 text-blue-400">ADVISORY:</strong>
-                            Use the <span className="text-white font-bold">Genetic Matrix</span> on the datapad to shape the protein's evolutionary path.
-                            <br />
-                            <ul className="list-disc pl-4 mt-2 space-y-1 text-gray-400">
-                                <li>Higher specialization increases <span className="text-cyan-400">Evolution Cost</span>.</li>
-                                <li>Balance your available SP budget carefully.</li>
-                            </ul>
-                        </div>
-
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="border-t border-white/10 pt-6 space-y-4">
+                    <div className="border-t border-white/10 pt-6 space-y-4 mt-8">
                         <button
                             onClick={() => setView('WORLD')}
                             className="w-full py-3 rounded border border-gray-600 text-gray-400 hover:text-white hover:bg-white/5 transition-colors uppercase tracking-widest text-xs"
@@ -107,7 +175,6 @@ export const BuilderUI = () => {
 
                         <button
                             onClick={() => {
-                                // Run simulation
                                 if (canAfford) {
                                     setView('SIMULATION');
                                 }
@@ -121,6 +188,7 @@ export const BuilderUI = () => {
                             {canAfford ? 'Initiate Deployment' : 'Insufficient Resources'}
                         </button>
                     </div>
+
                 </div>
 
             </div>

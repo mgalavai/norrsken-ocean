@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import { BuilderUI } from './components/Lab/BuilderUI';
 import { WorldScene } from './components/World/WorldScene';
 import { MissionBriefing } from './components/World/MissionBriefing';
@@ -29,7 +29,7 @@ function App() {
         </>
       )}
 
-      {view === 'SIMULATION' && (
+      {(view === 'SIMULATION' || view === 'RESULT') && (
         <>
           <Canvas>
             <PerspectiveCamera makeDefault position={[0, 2, 8]} fov={50} />
@@ -42,13 +42,6 @@ function App() {
           </Canvas>
           <SimulationUI />
         </>
-      )}
-
-      {view === 'RESULT' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black">
-          {/* Reuse SimulationUI for result mostly, or dedicated component. Logic inside SimUI handles it for now. */}
-          <SimulationUI />
-        </div>
       )}
     </div>
   );

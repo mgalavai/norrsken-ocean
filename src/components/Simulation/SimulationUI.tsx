@@ -31,7 +31,7 @@ export const SimulationUI = () => {
         // Calculate success probability based on stat matching
         let survivalScore = 100;
         const requirements: { stat: string; value: number; orgValue: number }[] = [
-            { stat: 'Temperature', value: difficulty.temp, orgValue: orgStats.heatRes },
+            { stat: 'Temperature', value: Math.max(0, (difficulty.temp - 20) * 6.6), orgValue: orgStats.heatRes },
             { stat: 'Acidity', value: difficulty.virulence, orgValue: orgStats.integrity },
             { stat: 'Pollution', value: difficulty.pollution, orgValue: orgStats.filtration },
             { stat: 'Currents', value: difficulty.currents, orgValue: orgStats.growth }
@@ -41,7 +41,7 @@ export const SimulationUI = () => {
         requirements.forEach(req => {
             const deficit = req.value - req.orgValue;
             if (deficit > 0) {
-                survivalScore -= deficit * 0.5; // Each point of deficit reduces survival by 0.5%
+                survivalScore -= deficit * 1.0; // Stricter penalty: 1% score loss per 1% deficit
                 timeouts.push(window.setTimeout(() => {
                     setLogs(l => [...l.slice(-4), `⚠ ${req.stat} stress detected (${req.value}% vs ${req.orgValue.toFixed(0)}%)`]);
                 }, Math.random() * 2000));
@@ -93,7 +93,7 @@ export const SimulationUI = () => {
         const netSP = spGained - evolutionCost;
 
         return (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 p-8">
+            <div className="absolute inset-0 z-50 flex items-center justify-center p-8">
                 <div className="max-w-2xl w-full">
                     {/* Header */}
                     <div className="text-center mb-8">

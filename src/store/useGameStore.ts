@@ -58,7 +58,7 @@ export const useGameStore = create<GameState>((set) => ({
 
     currentOrganism: {
         sequence: Array(15).fill(null), // We might procedureally fill this now
-        attributes: { heatRes: 0, integrity: 0, growth: 0, filtration: 0 }
+        attributes: { heatRes: 50, integrity: 50, growth: 50, filtration: 50 }
     },
 
     foldingState: { x: 0, y: 0 },
@@ -74,11 +74,13 @@ export const useGameStore = create<GameState>((set) => ({
         // Calculate derived stats
         // Top (Y=1): Heat, Bottom (Y=-1): Integrity
         // Right (X=1): Filtration, Left (X=-1): Growth
+        // CENTER (0,0): Balanced (50% all)
 
-        const heatRes = Math.max(0, y * 100);
-        const integrity = Math.max(0, -y * 100);
-        const filtration = Math.max(0, x * 100);
-        const growth = Math.max(0, -x * 100);
+        // Map [-1, 1] to [0, 100] linear trade-off
+        const heatRes = ((y + 1) / 2) * 100;        // -1 -> 0, 0 -> 50, 1 -> 100
+        const integrity = ((1 - y) / 2) * 100;      // 1 -> 0, 0 -> 50, -1 -> 100
+        const filtration = ((x + 1) / 2) * 100;     // -1 -> 0, 0 -> 50, 1 -> 100
+        const growth = ((1 - x) / 2) * 100;         // 1 -> 0, 0 -> 50, -1 -> 100
 
         // Procedurally generate "Sequence" for visual flair
         // If Y > 0.5 -> Red modules
@@ -102,7 +104,7 @@ export const useGameStore = create<GameState>((set) => ({
         };
     }),
 
-    clearOrganism: () => set({ foldingState: { x: 0, y: 0 }, currentOrganism: { sequence: [], attributes: { heatRes: 0, integrity: 0, growth: 0, filtration: 0 } } }),
+    clearOrganism: () => set({ foldingState: { x: 0, y: 0 }, currentOrganism: { sequence: [], attributes: { heatRes: 50, integrity: 50, growth: 50, filtration: 50 } } }),
 
     completeMission: (success) => set((state) => {
         if (!state.selectedMission) return state;
