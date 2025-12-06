@@ -12,7 +12,7 @@ import { fetchOceanTemperatureData, alertLevelToDifficulty, type OceanDataPoint 
 export async function generateMissionsFromOceanData(): Promise<Mission[]> {
     const oceanData = await fetchOceanTemperatureData();
 
-    return oceanData.map((data, index) => {
+    return oceanData.map((data) => {
         const missionId = `reef_${data.location.toLowerCase().replace(/\s+/g, '_')}`;
         const difficulty = alertLevelToDifficulty(data.bleachingAlert);
 

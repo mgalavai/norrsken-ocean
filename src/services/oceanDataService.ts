@@ -19,13 +19,16 @@ const CORAL_REEF_LOCATIONS = [
 ];
 
 // Bleaching Alert Levels (from NOAA CRW)
-export enum BleachingAlertLevel {
-    NO_STRESS = 0,      // No bleaching stress
-    WATCH = 1,          // Possible bleaching
-    WARNING = 2,        // Bleaching likely
-    ALERT_LEVEL_1 = 3,  // Bleaching occurring
-    ALERT_LEVEL_2 = 4   // Mortality likely
-}
+// Bleaching Alert Levels (from NOAA CRW)
+export const BleachingAlertLevel = {
+    NO_STRESS: 0,      // No bleaching stress
+    WATCH: 1,          // Possible bleaching
+    WARNING: 2,        // Bleaching likely
+    ALERT_LEVEL_1: 3,  // Bleaching occurring
+    ALERT_LEVEL_2: 4   // Mortality likely
+} as const;
+
+export type BleachingAlertLevel = typeof BleachingAlertLevel[keyof typeof BleachingAlertLevel];
 
 export interface OceanDataPoint {
     location: string;
