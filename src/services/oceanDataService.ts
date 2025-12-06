@@ -11,7 +11,7 @@ const CORAL_REEF_LOCATIONS = [
     { name: 'Great Barrier Reef', lat: -18.2871, lon: 147.6992, region: 'Australia', baselineSST: 26.5 },
     { name: 'Coral Triangle', lat: -5.0, lon: 120.0, region: 'Indonesia', baselineSST: 28.0 },
     { name: 'Caribbean Reefs', lat: 18.0, lon: -77.5, region: 'Jamaica', baselineSST: 27.5 },
-    { name: 'Red Sea Reefs', lat: 22.0, lon: 38.5, region: 'Egypt', baselineSST: 26.0 },
+    { name: 'Red Sea Reefs', lat: 20.5, lon: 38.0, region: 'Egypt', baselineSST: 26.0 },
     { name: 'Maldives Atolls', lat: 3.2028, lon: 73.2207, region: 'Maldives', baselineSST: 28.5 },
     { name: 'Hawaiian Reefs', lat: 21.3099, lon: -157.8581, region: 'Hawaii', baselineSST: 25.0 },
     { name: 'Seychelles', lat: -4.6796, lon: 55.4920, region: 'Seychelles', baselineSST: 27.8 },
@@ -44,6 +44,8 @@ export interface OceanDataPoint {
  */
 async function fetchNASA_SST(lat: number, lon: number): Promise<number | null> {
     try {
+        console.log(`🛰️ Fetching NASA data for: ${lat.toFixed(2)}°, ${lon.toFixed(2)}°`);
+
         // For browser compatibility, we'll use the CMR search API
         // In production, you'd use OPeNDAP or direct data access
         const yesterday = new Date();
@@ -52,23 +54,35 @@ async function fetchNASA_SST(lat: number, lon: number): Promise<number | null> {
 
         const url = `https://cmr.earthdata.nasa.gov/search/granules.json?short_name=MUR-JPL-L4-GLOB-v4.1&temporal=${dateStr}T00:00:00Z,${dateStr}T23:59:59Z&page_size=1`;
 
+        console.log(`📡 NASA API URL: ${url}`);
+
         const response = await fetch(url, {
             headers: {
                 'Authorization': `Bearer ${NASA_TOKEN}`
             }
         });
 
+        console.log(`📊 NASA API Response Status: ${response.status} ${response.statusText}`);
+
         if (!response.ok) {
-            console.warn('NASA API request failed, using simulation');
+            console.warn('⚠️ NASA API request failed, using simulation');
             return null;
         }
 
+        const data = await response.json();
+        console.log('✅ NASA API Response:', {
+            title: data.feed?.entry?.[0]?.title,
+            timeStart: data.feed?.entry?.[0]?.time_start,
+            datasetId: data.feed?.entry?.[0]?.dataset_id
+        });
+
         // For MVP, we simulate SST based on location since parsing NetCDF in browser is complex
         // In production, you'd use a backend service to extract actual values
+        console.log('ℹ️ Using simulation (NetCDF parsing requires backend)');
         return null; // Trigger fallback
 
     } catch (error) {
-        console.error('NASA API error:', error);
+        console.error('❌ NASA API error:', error);
         return null;
     }
 }

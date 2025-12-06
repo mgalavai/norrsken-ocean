@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MISSIONS } from '../../data/oceanData';
 import type { Mission } from '../../data/oceanData';
 import { useGameStore } from '../../store/useGameStore';
+import { fetchOceanTemperatureData } from '../../services/oceanDataService';
+import { TestReefPositions } from './TestReefPositions';
 
 // Helper: Equirectangular projection
 // Map (Lat, Lon) -> (X%, Y%)
@@ -45,6 +47,22 @@ export const WorldScene = () => {
     const missions = useGameStore(state => state.missions || MISSIONS);
     const setSelectedMission = (m: Mission) => useGameStore.setState({ selectedMission: m });
 
+    // Fetch NASA ocean data on mount
+    useEffect(() => {
+        console.log('🌊 WorldScene mounted - fetching ocean data...');
+        fetchOceanTemperatureData().then(data => {
+            console.log('📊 Ocean Data Retrieved:', data);
+            console.table(data.map(d => ({
+                Location: d.location,
+                SST: `${d.sst}°C`,
+                Anomaly: `${d.sstAnomaly > 0 ? '+' : ''}${d.sstAnomaly}°C`,
+                Alert: d.bleachingAlert,
+                DHW: d.dhw,
+                Source: d.dataSource
+            })));
+        });
+    }, []);
+
     return (
         <div className="w-full h-full bg-gray-950 flex items-center justify-center overflow-hidden relative selection:bg-none select-none">
 
@@ -73,6 +91,9 @@ export const WorldScene = () => {
                         onClick={() => setSelectedMission(mission)}
                     />
                 ))}
+
+                {/* TEST: Show all coral reef positions */}
+                <TestReefPositions />
 
             </div>
 
