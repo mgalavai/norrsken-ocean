@@ -62,7 +62,7 @@ export const MainMenu = () => {
                     className="
                         group relative w-full py-5 px-8 bg-cyan-600 hover:bg-cyan-500 rounded-sm shadow-[0_0_25px_rgba(8,145,178,0.4)] 
                         transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(8,145,178,0.6)]
-                        text-white border border-cyan-400/50
+                        text-white border border-cyan-400/50 overflow-hidden
                     "
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out"></div>
