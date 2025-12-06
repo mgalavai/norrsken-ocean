@@ -1,4 +1,5 @@
 import { useGameStore } from '../../store/useGameStore';
+import { useEffect } from 'react';
 
 // Alert level colors and labels
 const ALERT_STYLES = {
@@ -14,6 +15,17 @@ export const MissionBriefing = () => {
 
     if (!selectedMission) return null;
 
+    // ESC key to close modal
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                useGameStore.setState({ selectedMission: null });
+            }
+        };
+        window.addEventListener('keydown', handleEsc);
+        return () => window.removeEventListener('keydown', handleEsc);
+    }, []);
+
     // Calculate alert level from difficulty (reverse engineering from missionGenerator)
     const dhw = selectedMission.difficulty.virulence / 10;
     let alertLevel = 0;
@@ -25,8 +37,14 @@ export const MissionBriefing = () => {
     const alertStyle = ALERT_STYLES[alertLevel as keyof typeof ALERT_STYLES];
 
     return (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="relative w-full max-w-lg bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden">
+        <div
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => useGameStore.setState({ selectedMission: null })}
+        >
+            <div
+                className="relative w-full max-w-lg bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+            >
 
                 {/* Grid Background */}
                 <div className="absolute inset-0 bg-gray-950/50 z-0" />
