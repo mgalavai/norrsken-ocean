@@ -20,9 +20,9 @@ export const GlobalStatusPanel = () => {
             </div>
 
             {/* Tooltip on Hover */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 p-3 bg-gray-950/95 border border-cyan-500/30 rounded-md shadow-xl backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
-                <p className="text-[10px] text-gray-300 mb-2 leading-tight">{description}</p>
-                <div className="text-[8px] text-cyan-500 font-mono uppercase tracking-wider border-t border-white/10 pt-1">
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 p-4 bg-gray-950/95 border border-cyan-500/30 rounded-md shadow-xl backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                <p className="text-sm text-gray-200 mb-2 leading-snug">{description}</p>
+                <div className="text-[10px] text-cyan-400 font-bold font-mono uppercase tracking-wider border-t border-white/10 pt-2">
                     SOURCE: {source}
                 </div>
             </div>
